@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    command: [ 'start-dev', '--import-realm' ]
+    environment:
+      - KEYCLOAK_DB=dev-file
+      - KC_BOOTSTRAP_ADMIN_USERNAME=keycloak
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=keycloak
+      - KEYCLOAK_FEATURES=scripts
+    volumes:
+      - type: bind
+        source: ./tmp
+        target: /opt/keycloak/data/import
+        read_only: true
+    ports:
+      - "8888:8080"
