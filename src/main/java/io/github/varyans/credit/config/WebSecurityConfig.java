@@ -1,7 +1,11 @@
 package io.github.varyans.credit.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,14 +17,25 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper()
+                .registerModule(new JavaTimeModule());
+    }
+
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http, @Autowired CustomUserDetailConverter converter) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/**").authenticated() // Protect /api endpoints
-                        .anyRequest().denyAll()// Allow other requests (if any)
+                        .requestMatchers(HttpMethod.POST,"/api/v1/loan").hasAuthority("ADMIN")
+//                        .requestMatchers("/api/admin").hasAuthority("ADMIN")
+//                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().denyAll()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(converter)))
                 .csrf(Customizer.withDefaults())
+                .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
