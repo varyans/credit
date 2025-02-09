@@ -21,15 +21,29 @@ public class UserPrincipal implements UserDetails {
     private final String lastName;
     @Getter
     private final Integer creditLimit;
+    @Getter
+    private final Boolean isAdmin;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(String userId, String username, Collection<GrantedAuthority> authorities) {
+    public UserPrincipal(String userId, String username,Collection<GrantedAuthority> authorities) {
         this.userId = userId;
         this.userName = username;
+        this.isAdmin = authorities.stream().map(GrantedAuthority::getAuthority).anyMatch("ADMIN"::equals);
         this.email = "";
         this.firstName = "";
         this.lastName = "";
         this.creditLimit = 0;
+        this.authorities = authorities;
+    }
+
+    public UserPrincipal(String userId, String username, String email, String firstName, String lastName, Integer creditLimit, Collection<GrantedAuthority> authorities) {
+        this.userId = userId;
+        this.userName = username;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.creditLimit = creditLimit;
+        this.isAdmin = authorities.stream().map(GrantedAuthority::getAuthority).anyMatch("ADMIN"::equals);
         this.authorities = authorities;
     }
 
