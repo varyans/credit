@@ -29,11 +29,15 @@ public class CustomUserDetailConverter implements Converter<Jwt, AbstractAuthent
 
         String userId = (String) claims.get("sid");
         String username = (String) claims.get("preferred_username");
+        String email = (String) claims.get("email");
+        String firstName = (String) claims.get("given_name");
+        String lastName = (String) claims.get("family_name");
+        Integer creditLimit = Integer.parseInt((String) claims.get("limit"));
         Collection<GrantedAuthority> authorities = extractAuthoritiesFromClaims(claims);
 
-        UserPrincipal userPrincipal = new UserPrincipal(userId, username, authorities);
+        UserPrincipal userPrincipal1 = new UserPrincipal(userId, username, email, firstName, lastName, creditLimit, authorities);
 
-        return new UsernamePasswordAuthenticationToken(userPrincipal, "n/a", authorities);
+        return new UsernamePasswordAuthenticationToken(userPrincipal1, "n/a", authorities);
     }
 
     private Collection<GrantedAuthority> extractAuthoritiesFromClaims(Map<String, Object> claims) {

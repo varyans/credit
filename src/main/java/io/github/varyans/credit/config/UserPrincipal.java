@@ -13,8 +13,25 @@ import java.util.Collection;
 public class UserPrincipal implements UserDetails {
     @Getter
     private final String userId;
-    private final String username;
+    private final String userName;
+    private final String email;
+    @Getter
+    private final String firstName;
+    @Getter
+    private final String lastName;
+    @Getter
+    private final Integer creditLimit;
     private final Collection<? extends GrantedAuthority> authorities;
+
+    public UserPrincipal(String userId, String username, Collection<GrantedAuthority> authorities) {
+        this.userId = userId;
+        this.userName = username;
+        this.email = "";
+        this.firstName = "";
+        this.lastName = "";
+        this.creditLimit = 0;
+        this.authorities = authorities;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -28,7 +45,6 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return userName;
     }
-
 }
