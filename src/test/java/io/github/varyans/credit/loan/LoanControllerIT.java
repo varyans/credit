@@ -77,6 +77,31 @@ public class LoanControllerIT {
         assertThat(response.getStatusCode().is4xxClientError()).isTrue();
     }
 
+    @Test
+    void customer_tries_to_update_another_customer_should_return_bad_request() {
+        String token = getCustomerToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        CreateLoanRequest request = CreateLoanRequest.builder()
+                .customerId("customer2")
+                .installment(EnumInstallment.i6)
+                .rate(0.4)
+                .amount(BigDecimal.valueOf(1000))
+                .build();
+
+        HttpEntity<CreateLoanRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "http://localhost:" + port + "/api/v1/loan",
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
+    }
+
     private String getAdminToken() {
 
         try (Keycloak
@@ -85,6 +110,21 @@ public class LoanControllerIT {
                 "inghubs",
                 "admin1",
                 "admin1",
+                "credit")) {
+
+            return keycloak.tokenManager().getAccessToken().getToken();
+
+        }
+    }
+
+    private String getCustomerToken() {
+
+        try (Keycloak
+                     keycloak = Keycloak.getInstance(
+                "http://localhost:8888",
+                "inghubs",
+                "customer1",
+                "customer1",
                 "credit")) {
 
             return keycloak.tokenManager().getAccessToken().getToken();
