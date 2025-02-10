@@ -89,7 +89,11 @@ public class LoanService {
     }
 
     public Object getLoan(Long loanId, UserPrincipal principal) {
-
-        return loanInstallmentRepository.findAllByLoanId(loanId);
+        if (!principal.getIsAdmin()) {
+            return loanRepository.findById(loanId)
+                    .filter(loanEntity -> loanEntity.getCustomerId().equalsIgnoreCase(principal.getUsername()))
+                    .orElseThrow(() -> new IllegalArgumentException("Loan not found"));
+        }
+        return loanInstallmentRepository.findAllByLoanId(loanId).stream().findFirst();
     }
 }

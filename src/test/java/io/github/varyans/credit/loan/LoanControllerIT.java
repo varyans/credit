@@ -2,6 +2,7 @@ package io.github.varyans.credit.loan;
 
 
 import io.github.varyans.credit.loan.model.CreateLoanRequest;
+import io.github.varyans.credit.loan.model.CreateLoanResponse;
 import io.github.varyans.credit.loan.model.EnumInstallment;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -125,6 +127,50 @@ public class LoanControllerIT {
                 String.class
         );
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+    }
+
+    @Test
+    void customer_tries_to_get_loan_which_belong_to_some_one_else_for_itself_should_return_bad_request() {
+        String token = getAdminToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        CreateLoanRequest request = CreateLoanRequest.builder()
+                .customerId("customer2")
+                .installment(EnumInstallment.i6)
+                .rate(0.4)
+                .amount(BigDecimal.valueOf(1000))
+                .build();
+
+        HttpEntity<CreateLoanRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<CreateLoanResponse> prepareResponse = restTemplate.exchange(
+                "http://localhost:" + port + "/api/v1/loan",
+                HttpMethod.POST,
+                entity,
+                CreateLoanResponse.class
+        );
+
+
+        Long id = Optional.ofNullable(prepareResponse.getBody()).map(CreateLoanResponse::id).orElseThrow();
+
+        String customer1Token = getCustomerToken();
+
+
+        HttpHeaders getHeaders = new HttpHeaders();
+        getHeaders.set("Authorization", "Bearer " + customer1Token);
+        HttpEntity<Void> getEntity = new HttpEntity<>(null, getHeaders);
+        String url = "http://localhost:" + port + "/api/v1/loan/" + id;
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                getEntity,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).contains("Loan not found");
     }
 
     private String getAdminToken() {
