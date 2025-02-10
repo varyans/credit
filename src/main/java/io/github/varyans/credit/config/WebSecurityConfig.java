@@ -27,7 +27,7 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http, @Autowired CustomUserDetailConverter converter) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST,"/api/v1/loan").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/loan").authenticated()
 //                        .requestMatchers("/api/admin").hasAuthority("ADMIN")
 //                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().denyAll()

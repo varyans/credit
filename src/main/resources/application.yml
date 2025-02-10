@@ -1,4 +1,20 @@
 spring:
+  datasource:
+    url: jdbc:h2:mem:loandb
+    driver-class-name: org.h2.Driver
+    username: user
+    password: pass
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      mode: always
   application:
     name: credit
   security:
@@ -6,14 +22,14 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8888/realms/inghubs
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    open-in-view: false
+
   threads:
     virtual:
       enabled: true
 
-
-      #spring.jpa.hibernate.ddl-auto=create-drop
+  logging:
+    level:
+      org:
+        hibernate:
+          SQL: DEBUG
 

@@ -81,4 +81,14 @@ public class CustomerService {
                 .creditLimit(BigDecimal.valueOf(principal.getCreditLimit()))
                 .build());
     }
+
+    public void updateUsedCredit(String customerId,BigDecimal newUsedCreditLimit) {
+        customerRepository.findById(customerId)
+                .ifPresentOrElse(
+                        existingCustomer -> customerRepository.save(existingCustomer.withUsedCreditLimit(newUsedCreditLimit)),
+                        () -> {
+                            throw new IllegalArgumentException("User not found");
+                        }
+                );
+    }
 }
