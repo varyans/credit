@@ -29,6 +29,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST,"/api/v1/loan").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/v1/loan").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/loan/{loanId}").authenticated()
 //                        .requestMatchers("/api/admin").hasAuthority("ADMIN")
 //                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().denyAll()
