@@ -25,7 +25,7 @@ public class LoanInstallmentEntity {
     private BigDecimal paidAmount;
     private LocalDate dueDate;
     private LocalDate paymentDate;
-    private LocalDate createDate = LocalDate.now();
+    private LocalDate createDate;
     private boolean isPaid;
 
     @ManyToOne

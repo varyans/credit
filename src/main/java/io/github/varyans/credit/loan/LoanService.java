@@ -84,4 +84,12 @@ public class LoanService {
         return customerService.upsertCustomer(principal);
     }
 
+    public Object getLoans(UserPrincipal principal) {
+        return loanRepository.findAllByCustomerIdOrIsAdmin(principal.getUsername(),principal.getIsAdmin());
+    }
+
+    public Object getLoan(Long loanId, UserPrincipal principal) {
+
+        return loanInstallmentRepository.findAllByLoanId(loanId);
+    }
 }
