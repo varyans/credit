@@ -2,15 +2,21 @@ package io.github.varyans.credit.customer;
 
 import io.github.varyans.credit.config.UserPrincipal;
 import io.github.varyans.credit.customer.model.Customer;
+import io.github.varyans.credit.customer.model.CustomerEntity;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.UserResource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 public class CustomerService {
+
+    private final CustomerRepository customerRepository;
+
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
     public Customer findCustomer(String customerId) {
         try (Keycloak keycloak = Keycloak.getInstance(
                 "http://localhost:8888",
@@ -45,11 +51,34 @@ public class CustomerService {
     }
 
     private Customer upsertCustomer(Customer customer) {
-
-        return null;
+       customerRepository.findById(customer.id())
+                .ifPresentOrElse(
+                        existingCustomer -> customerRepository.save(existingCustomer.withCreditLimit(customer.creditLimit())),
+                        () -> customerRepository.save(CustomerEntity.builder()
+                                        .id(customer.id())
+                                        .name(customer.name())
+                                        .surname(customer.surname())
+                                        .creditLimit(customer.creditLimit())
+                                        .usedCreditLimit(BigDecimal.ZERO)
+                                .build())
+                );
+        return customerRepository.findById(customer.id())
+                .map(customerEntity -> Customer.builder()
+                        .id(customerEntity.getId())
+                        .name(customerEntity.getName())
+                        .surname(customerEntity.getSurname())
+                        .creditLimit(customerEntity.getCreditLimit())
+                        .usedCreditLimit(customerEntity.getUsedCreditLimit())
+                        .build())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     public Customer upsertCustomer(UserPrincipal principal) {
-        return null;
+        return upsertCustomer(Customer.builder()
+                .id(principal.getUsername())
+                .name(principal.getFirstName())
+                .surname(principal.getLastName())
+                .creditLimit(BigDecimal.valueOf(principal.getCreditLimit()))
+                .build());
     }
 }

@@ -49,8 +49,31 @@ public class LoanControllerIT {
                 entity,
                 String.class
         );
-        System.out.println(response.getStatusCode().value());
-        System.out.println(response.getBody());
+        assertThat(response.getStatusCode().is4xxClientError()).isTrue();
+    }
+
+    @Test
+    void too_much_amount_asked_for_loan_by_admin_user_should_return_bad_request() {
+        String token = getAdminToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        CreateLoanRequest request = CreateLoanRequest.builder()
+                .customerId("customer1")
+                .installment(EnumInstallment.i6)
+                .rate(0.4)
+                .amount(BigDecimal.valueOf(1000000))
+                .build();
+
+        HttpEntity<CreateLoanRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "http://localhost:" + port + "/api/v1/loan",
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
         assertThat(response.getStatusCode().is4xxClientError()).isTrue();
     }
 

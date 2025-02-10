@@ -24,6 +24,9 @@ public class LoanService {
         }
         Customer customer = upsertCustomer(request, principal);
 
+        if (request.amount().compareTo(customer.creditLimit().add(customer.usedCreditLimit().negate())) > 0) {
+            throw new IllegalArgumentException("Credit limit exceeded");
+        }
 
         return null;
     }
@@ -35,10 +38,4 @@ public class LoanService {
         return customerService.upsertCustomer(principal);
     }
 
-    @SneakyThrows
-    private void getUser(String userId) {
-        if (userId.equals("1")) {
-            throw new IllegalArgumentException("User not found");
-        }
-    }
 }
